@@ -1,0 +1,35 @@
+# Core Azure packages
+azure-ai-projects
+azure-ai-inference
+azure-identity
+azure-core
+azure-storage-blob
+azure-search-documents
+
+# Data science essentials
+numpy
+pandas
+
+# LangChain - Updated versions that work together
+langchain
+langchain-community
+langchain-core
+langchain-openai
+
+# Document processing
+pypdf
+unstructured
+python-docx
+
+# Web framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Frontend
+streamlit
+altair
+
+# Utilities
+python-dotenv
+requests

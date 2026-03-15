@@ -1,0 +1,4 @@
+INFO:azure.identity._credentials.environment:No environment configuration found.
+INFO:azure.identity._credentials.managed_identity:ManagedIdentityCredential will use IMDS
+INFO:backend.main:\u2705 Connected to Azure AI Foundry
+app OK
