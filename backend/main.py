@@ -6,10 +6,7 @@ from typing import List, Optional, Dict, Any
 import os
 import uuid
 import logging
-import requests
 from dotenv import load_dotenv
-from azure.identity import DefaultAzureCredential
-from azure.ai.projects import AIProjectClient
 from backend.ragengine import RAGEngine
 
 # Load environment
@@ -19,19 +16,8 @@ load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Azure client
-try:
-    project_client = AIProjectClient(
-        endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        credential=DefaultAzureCredential()
-    )
-    logger.info("✅ Connected to Azure AI Foundry")
-except Exception as e:
-    logger.error(f"❌ Failed to connect: {e}")
-    raise
-
 # Initialize RAG engine
-rag_engine = RAGEngine(project_client)
+rag_engine = RAGEngine()
 
 # Create FastAPI app
 app = FastAPI(title="Document Q&A System", version="1.0.0")
@@ -55,10 +41,6 @@ class QueryResponse(BaseModel):
     sources: List[Dict]
     session_id: str
 
-class DocumentResponse(BaseModel):
-    filename: str
-    url: str
-    size: int
 
 # Store chat sessions
 chat_sessions = {}
@@ -124,32 +106,6 @@ async def upload_document(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/debug/deployments")
-async def debug_deployments():
-    """Debug endpoint to list available OpenAI deployments."""
-    deployments = _get_openai_deployments()
-    return {"deployments": deployments or []}
-
-
-def _get_openai_deployments() -> Optional[List[str]]:
-    """Fetch list of OpenAI deployments."""
-    endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-    api_version = os.getenv("AZURE_OPENAI_API_VERSION")
-    api_key = os.getenv("AZURE_OPENAI_KEY") or os.getenv("AZURE_SEARCH_KEY")
-
-    if not all([endpoint, api_version, api_key]):
-        return None
-
-    url = f"{endpoint.rstrip('/')}/deployments?api-version={api_version}"
-    try:
-        resp = requests.get(url, headers={"api-key": api_key}, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
-        return [d.get("name") for d in data.get("data", []) if isinstance(d, dict)]
-    except Exception:
-        return None
-
-
 @app.get("/health")
 async def health():
     """Health check endpoint."""
@@ -161,8 +117,5 @@ async def health():
             "embedding": os.getenv("EMBEDDING_MODEL_DEPLOYMENT_NAME"),
         },
     }
-
-    if os.getenv("ENABLE_DEBUG_ENDPOINTS") == "1":
-        health_info["openai_deployments"] = _get_openai_deployments()
 
     return health_info

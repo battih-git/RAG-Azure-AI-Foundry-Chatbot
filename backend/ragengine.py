@@ -5,6 +5,7 @@ import requests
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient
 
+
 class RAGEngine:
     """
     Retrieval-Augmented Generation (RAG) engine for document Q&A.
@@ -13,10 +14,9 @@ class RAGEngine:
     using Azure OpenAI and Azure Cognitive Search.
     """
 
-    def __init__(self, project_client: Any = None):
+    def __init__(self):
         """Initialize the RAG engine with Azure services."""
         self.logger = logging.getLogger(__name__)
-        self.project_client = project_client
 
         # Load configuration from environment
         self._load_config()
